@@ -17,7 +17,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///posts.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-
 ##CONFIGURE TABLE
 class BlogPost(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -45,6 +44,7 @@ class CreatePostForm(FlaskForm):
 @app.route('/')
 def get_all_posts():
     posts = db.session.query(BlogPost).all()
+    print(posts[0].title)
     return render_template("index.html", all_posts=posts)
 
 
@@ -76,6 +76,14 @@ def add():
         db.session.commit()
         return redirect(url_for('get_all_posts'))
     return render_template("make-post.html", form=form, is_edit=False)
+
+
+@app.route("/delete/<int:post_id>")
+def delete(post_id):
+    post_to_delete = BlogPost.query.get(post_id)
+    db.session.delete(post_to_delete)
+    db.session.commit()
+    return redirect(url_for('get_all_posts'))
 
 
 @app.route("/edit-post/<int:post_id>", methods=["GET", "POST"])
